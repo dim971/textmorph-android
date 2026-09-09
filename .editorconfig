@@ -1,0 +1,29 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_size = 4
+indent_style = space
+max_line_length = 110
+
+# The Kotlin coding conventions carve out @Composable functions returning Unit:
+# they follow the class-naming convention, not the function one. ktlint's
+# function-naming rule needs telling.
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# The core mirrors the iOS twin file for file, on purpose: a change to shared
+# behaviour should land in a file with the same name in both repositories, and
+# the two suites replay the same fixtures. Three of those files hold one type
+# plus the free functions that only exist to keep a file under the length the
+# lint allows, so ktlint's rule that a file be named after its single class
+# would rename them away from their twins. The naming that matters here is the
+# cross-repository one.
+ktlint_standard_filename = disabled
+
+[*.{yml,yaml,json,xml}]
+indent_size = 2
