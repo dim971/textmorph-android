@@ -57,7 +57,7 @@ private val SCRIPT =
 
 /** A scripted edit, so the caret can be watched doing its work. */
 @Composable
-fun NumberDemo() {
+fun AmountDemo() {
     val settings = LocalShowcaseSettings.current
     var step by remember { mutableIntStateOf(0) }
     val still = rememberReducedMotion()
@@ -101,7 +101,7 @@ fun NumberDemo() {
     }
 }
 
-val numberDemo =
+val amountDemo =
     Demo(
         id = "amount",
         name = "Amount",
@@ -116,5 +116,5 @@ val numberDemo =
             TextMorph(text = "${'$'}4,020", cursorIndex = 4)   // a digit was inserted
             TextMorph(text = "${'$'}4.20", cursorIndex = 3)    // a point was
             """.trimIndent(),
-        content = { NumberDemo() },
+        content = { AmountDemo() },
     )

@@ -1,6 +1,7 @@
 package io.github.dim971.textmorph.showcase.catalog
 
 import io.github.dim971.textmorph.showcase.demos.actionDemo
+import io.github.dim971.textmorph.showcase.demos.amountDemo
 import io.github.dim971.textmorph.showcase.demos.bubbleSliderDemo
 import io.github.dim971.textmorph.showcase.demos.chartDemo
 import io.github.dim971.textmorph.showcase.demos.copyDemo
@@ -14,7 +15,6 @@ import io.github.dim971.textmorph.showcase.demos.helloDemo
 import io.github.dim971.textmorph.showcase.demos.hexColourDemo
 import io.github.dim971.textmorph.showcase.demos.holdToConfirmDemo
 import io.github.dim971.textmorph.showcase.demos.installDemo
-import io.github.dim971.textmorph.showcase.demos.numberDemo
 import io.github.dim971.textmorph.showcase.demos.numoraFieldDemo
 import io.github.dim971.textmorph.showcase.demos.pullToCountDemo
 import io.github.dim971.textmorph.showcase.demos.rangeShoveDemo
@@ -87,7 +87,7 @@ val catalog: List<Demo> =
         squishyNumberDemo,
         squeezeToAbbreviateDemo,
         sloshGaugeDemo,
-        numberDemo,
+        amountDemo,
         trailingTagDemo,
         helloDemo,
         reflowDemo,
