@@ -27,3 +27,10 @@ ktlint_standard_filename = disabled
 
 [*.{yml,yaml,json,xml}]
 indent_size = 2
+
+# Generated, and never edited by hand. ktlint would reformat it into something
+# the generator does not produce, which would make "regenerate and see no diff"
+# stop being the check that it is. The iOS twin excludes its own copy from
+# SwiftLint for the same reason.
+[**/UnicodeBreakTables.kt]
+ktlint = disabled

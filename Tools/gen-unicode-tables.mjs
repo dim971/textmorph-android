@@ -150,13 +150,27 @@ function flatten(ranges, withValue) {
   return out;
 }
 
-function hexLiterals(numbers, perLine, indent) {
+// Wrapped by column rather than by count, because a table of astral code points
+// has six hex digits to a value where a table of Latin ones has two, and a
+// fixed count that fits one overruns the other. Both projects lint the width of
+// the file they generate.
+//
+// Swift and Kotlin also disagree about a trailing comma in a literal list, and
+// both lint for that too, so the caller says which it wants.
+function hexLiterals(numbers, maxWidth, indent, trailingComma) {
+  const literals = numbers.map((n) => `0x${n.toString(16).toUpperCase()}`);
   const lines = [];
-  for (let i = 0; i < numbers.length; i += perLine) {
-    lines.push(
-      indent + numbers.slice(i, i + perLine).map((n) => `0x${n.toString(16).toUpperCase()}`).join(", ") + ",",
-    );
+  let line = indent;
+  for (const [index, literal] of literals.entries()) {
+    const last = index === literals.length - 1;
+    const piece = literal + (last && !trailingComma ? "" : ",");
+    if (line !== indent && line.length + 1 + piece.length > maxWidth) {
+      lines.push(line);
+      line = indent;
+    }
+    line += line === indent ? piece : ` ${piece}`;
   }
+  if (line !== indent) lines.push(line);
   return lines.join("\n");
 }
 
@@ -216,9 +230,9 @@ function emitSwift(tables) {
   for (const [name, numbers, stride] of tables) {
     parts.push(`    /// ${stride === 3 ? "start, end, value" : "start, end"} triples, sorted by start.`);
     parts.push(`    static let ${name}: [UInt32] = [`);
-    parts.push(hexLiterals(numbers, 12, "        "));
+    parts.push(hexLiterals(numbers, 110, "        ", false));
     parts.push("    ]");
-    parts.push("");
+    if (name !== tables[tables.length - 1][0]) parts.push("");
   }
   parts.push("}");
   return parts.join("\n") + "\n";
