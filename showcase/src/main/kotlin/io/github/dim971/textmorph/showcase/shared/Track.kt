@@ -44,8 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
@@ -360,11 +359,17 @@ private fun bodyOf(
 }
 
 /**
- * A rounded body with a tail hanging off the bottom, tip down.
+ * A rounded body with a tail flowing out of its bottom edge, tip down.
  *
- * The tip is where the bubble pivots, which is why it is part of the shape
- * rather than a separate view: the layer's transform origin can then be the
- * bottom of the box and mean the right thing.
+ * One continuous outline rather than a body plus a triangle, and that is not
+ * tidiness: two subpaths wound in opposite directions cancel where they overlap
+ * under non-zero winding, which drew a pale seam across the join and made the
+ * tail read as a separate arrow stuck underneath. One path has nothing to
+ * cancel against.
+ *
+ * The tail leaves and rejoins the bottom edge on quadratic curves, so it grows
+ * out of the bubble rather than being welded to it. Its apex is exactly the
+ * bottom centre of the box, which is the point the layer rotates about.
  */
 private class BubbleShape : Shape {
     override fun createOutline(
@@ -373,27 +378,28 @@ private class BubbleShape : Shape {
         density: Density,
     ): Outline {
         val tail = with(density) { TAIL.dp.toPx() }
-        val radius = with(density) { BUBBLE_RADIUS.dp.toPx() }
-        val body = size.height - tail
+        val base = with(density) { TAIL_HALF_BASE.dp.toPx() }
+        val w = size.width
+        val h = size.height
+        val body = h - tail
+        val r = minOf(with(density) { BUBBLE_RADIUS.dp.toPx() }, w / 2, body / 2)
+        val middle = w / 2
+
         val path =
             Path().apply {
-                addRoundRect(
-                    RoundRect(
-                        left = 0f,
-                        top = 0f,
-                        right = size.width,
-                        bottom = body,
-                        cornerRadius = CornerRadius(radius),
-                    ),
-                )
-                // Symmetric, and its apex is exactly the bottom centre of the
-                // box, which is what the layer rotates about. An off-centre apex
-                // means the pill pivots about a point that is not its tip, so
-                // the tail slides off the thumb as it leans.
-                val half = with(density) { TAIL_HALF_BASE.dp.toPx() }
-                moveTo(size.width / 2 - half, body - 1f)
-                lineTo(size.width / 2, size.height)
-                lineTo(size.width / 2 + half, body - 1f)
+                moveTo(r, 0f)
+                lineTo(w - r, 0f)
+                arcTo(Rect(w - 2 * r, 0f, w, 2 * r), -90f, 90f, false)
+                lineTo(w, body - r)
+                arcTo(Rect(w - 2 * r, body - 2 * r, w, body), 0f, 90f, false)
+                // Out along the bottom edge to where the tail begins, then down.
+                lineTo(middle + base, body)
+                quadraticTo(middle + base * 0.45f, h, middle, h)
+                quadraticTo(middle - base * 0.7f, body + tail * 0.5f, middle - base, body)
+                lineTo(r, body)
+                arcTo(Rect(0f, body - 2 * r, 2 * r, body), 90f, 90f, false)
+                lineTo(0f, r)
+                arcTo(Rect(0f, 0f, 2 * r, 2 * r), 180f, 90f, false)
                 close()
             }
         return Outline.Generic(path)
