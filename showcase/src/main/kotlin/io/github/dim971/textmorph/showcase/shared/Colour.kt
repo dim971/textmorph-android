@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
  * A morph fills its own glyphs, so the colour is a parameter rather than
  * something inherited from a `LocalContentColor`: there is no text node to
  * inherit it. Every demo asks for the same one so that the catalogue reads as
- * one app rather than as fifteen.
+ * one app rather than as thirty-five.
  */
 @Composable
 @ReadOnlyComposable

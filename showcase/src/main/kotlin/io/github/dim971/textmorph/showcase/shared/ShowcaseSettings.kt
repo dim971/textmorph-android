@@ -97,7 +97,7 @@ class ShowcaseSettings {
     }
 }
 
-/** The settings, reachable from any demo without threading them through fifteen signatures. */
+/** The settings, reachable from any demo without threading them through thirty-five signatures. */
 val LocalShowcaseSettings = compositionLocalOf { ShowcaseSettings() }
 
 /**

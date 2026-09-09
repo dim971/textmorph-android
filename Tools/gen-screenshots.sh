@@ -55,10 +55,10 @@ PYEOF
 shot catalog
 shot playground --es screen Playground
 shot about --es screen About
-shot hero --es demo wallet
-shot wallet --es demo wallet
+shot hero --es demo earned
+shot wallet --es demo earned
 shot ticker --es demo ticker
-shot field --es demo field
-shot reflow --es demo reflow
+shot field --es demo amount
+shot reflow --es demo resize
 
 crop

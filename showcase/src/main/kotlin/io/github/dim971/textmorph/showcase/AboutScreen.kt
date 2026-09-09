@@ -34,6 +34,13 @@ fun AboutScreen() {
                 "engine's capabilities, one screen per capability, so that a question about " +
                 "the library has one screen that answers it.",
         )
+        Paragraph(
+            "Thirty-three of the screens are upstream's own examples, in its order and with " +
+                "its values, so the two catalogues can be read side by side. The interface " +
+                "around each morph is written for this platform rather than reproduced: " +
+                "upstream's spring-hung bubbles and its collision solver are not here, and " +
+                "the catalogue says so.",
+        )
         Text("How it is held to the original", style = MaterialTheme.typography.titleMedium)
         Paragraph(
             "The engine is pinned by fixtures generated from the published npm package, plus " +
