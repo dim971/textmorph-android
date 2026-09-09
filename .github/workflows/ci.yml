@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Library and showcase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The em dash and the en dash are banned in this repository; see CLAUDE.md.
+      - name: No em dash
+        run: |
+          if git grep -In $'\xe2\x80\x94' -- . || git grep -In $'\xe2\x80\x93' -- .; then
+            echo "::error::U+2014 or U+2013 found; use a comma, a colon or a full stop"
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The engine is pinned to the JavaScript original's output; a failure here
+      # means the port has drifted. See docs/fidelity.md.
+      - name: Test
+        run: ./gradlew :textmorph:testDebugUnitTest
+
+      # Warnings are errors in both modules, so this is also the warning gate.
+      - name: Build the library
+        run: ./gradlew :textmorph:assembleRelease
+
+      - name: Build the showcase
+        run: ./gradlew :showcase:assembleDebug
+
+      - name: Lint
+        run: ./gradlew ktlintCheck :textmorph:lintDebug :showcase:lintDebug
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            textmorph/build/reports/
+            showcase/build/reports/
+          if-no-files-found: ignore
+
+  parity:
+    name: Parity with iOS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The two ports replay the same fixtures and run the same generators, so a
+      # divergence is a changed digest rather than a discovery months later. The
+      # expected values are checked in; regenerating either side is a deliberate
+      # act and has to update this file with an explanation.
+      #
+      # Digested by basename rather than by path, so that
+      # .github/parity-digests.txt is byte identical in the two repositories and
+      # the two files can simply be diffed against each other.
+      - name: Fixture and generator digests
+        run: |
+          grep '^#' .github/parity-digests.txt > digests.txt
+          for file in \
+            textmorph/src/test/resources/goldens.json \
+            textmorph/src/test/resources/unicode-break-tests.json \
+            Tools/gen-goldens.mjs \
+            Tools/gen-unicode-tables.mjs
+          do
+            printf '%s  %s\n' \
+              "$(shasum -a 256 "$file" | cut -d' ' -f1)" \
+              "$(basename "$file")" >> digests.txt
+          done
+          diff digests.txt .github/parity-digests.txt
+
+      # The generated tables are checked in, and the check that they are what the
+      # generator produces is that regenerating changes nothing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Regenerate the Unicode tables
+        run: |
+          node Tools/gen-unicode-tables.mjs \
+            --kotlin textmorph/src/main/kotlin/io/github/dim971/textmorph/core/UnicodeBreakTables.kt \
+            --tests textmorph/src/test/resources/unicode-break-tests.json
+          git diff --exit-code

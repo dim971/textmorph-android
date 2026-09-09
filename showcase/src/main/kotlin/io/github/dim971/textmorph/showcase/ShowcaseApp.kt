@@ -22,8 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.dim971.textmorph.showcase.catalog.CatalogScreen
-import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.catalog.DemoScreen
+import io.github.dim971.textmorph.showcase.catalog.catalog
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.ShowcaseSettings
 
@@ -44,10 +44,15 @@ private enum class Tab(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowcaseApp() {
+fun ShowcaseApp(
+    startScreen: String? = null,
+    startDemo: String? = null,
+) {
     val settings = remember { ShowcaseSettings() }
-    var tab by remember { mutableStateOf(Tab.Catalog) }
-    var open by remember { mutableStateOf<Demo?>(null) }
+    var tab by remember {
+        mutableStateOf(Tab.entries.firstOrNull { it.name.equals(startScreen, true) } ?: Tab.Catalog)
+    }
+    var open by remember { mutableStateOf(catalog.firstOrNull { it.id == startDemo }) }
 
     // Light and dark, and no dynamic colour: that needs API 31 and this app
     // supports 24, which is the library's floor and therefore the floor the
