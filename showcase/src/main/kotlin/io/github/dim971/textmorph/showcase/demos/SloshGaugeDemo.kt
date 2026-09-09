@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +25,7 @@ import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.Caption
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.onTint
 import io.github.dim971.textmorph.showcase.shared.rememberAutoplay
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
 import io.github.dim971.textmorph.showcase.shared.stageFont
@@ -45,7 +45,7 @@ fun SloshGaugeDemo() {
         label = "level",
     )
     val value = "${(level * 100).roundToInt()}%"
-    val liquid = MaterialTheme.colorScheme.primary
+    val liquid = settings.tint.colour
 
     Stage {
         Box(
@@ -99,7 +99,7 @@ fun SloshGaugeDemo() {
                     text = value,
                     options = settings.options,
                     font = stageFont(size = 30.sp),
-                    colour = Color.Black.copy(alpha = 0.85f),
+                    colour = onTint(liquid),
                 )
             }
         }

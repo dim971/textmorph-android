@@ -10,13 +10,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
@@ -27,6 +25,7 @@ import io.github.dim971.textmorph.showcase.shared.Chip
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.ShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.onTint
 import io.github.dim971.textmorph.showcase.shared.rememberTicker
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
 import io.github.dim971.textmorph.showcase.shared.stageFont
@@ -44,7 +43,7 @@ fun ActionDemo() {
         animationSpec = infiniteRepeatable(tween(500, easing = LinearEasing), RepeatMode.Restart),
         label = "angle",
     )
-    val tint = MaterialTheme.colorScheme.primary
+    val tint = settings.tint.colour
 
     Stage {
         Chip {
@@ -67,14 +66,14 @@ fun ActionDemo() {
                         drawCircle(tint)
                         val w = size.minDimension
                         drawLine(
-                            Color.Black.copy(alpha = 0.85f),
+                            onTint(tint),
                             Offset(w * 0.28f, w * 0.52f),
                             Offset(w * 0.44f, w * 0.68f),
                             strokeWidth = w * 0.13f,
                             cap = StrokeCap.Round,
                         )
                         drawLine(
-                            Color.Black.copy(alpha = 0.85f),
+                            onTint(tint),
                             Offset(w * 0.44f, w * 0.68f),
                             Offset(w * 0.72f, w * 0.36f),
                             strokeWidth = w * 0.13f,

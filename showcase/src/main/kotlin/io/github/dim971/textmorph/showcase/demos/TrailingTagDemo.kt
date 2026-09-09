@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
@@ -29,6 +28,7 @@ import io.github.dim971.textmorph.showcase.shared.Caption
 import io.github.dim971.textmorph.showcase.shared.LocalInteractive
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.onTint
 import io.github.dim971.textmorph.showcase.shared.rememberAutoplay
 import io.github.dim971.textmorph.showcase.shared.stageFont
 
@@ -113,7 +113,7 @@ fun TrailingTagDemo() {
                 Box(
                     Modifier
                         .background(
-                            MaterialTheme.colorScheme.primary,
+                            settings.tint.colour,
                             RoundedCornerShape(8.dp),
                         ).padding(horizontal = 10.dp, vertical = 5.dp),
                 ) {
@@ -121,7 +121,7 @@ fun TrailingTagDemo() {
                         text = ZONES[zone],
                         options = settings.options,
                         font = stageFont(size = 15.sp),
-                        colour = Color.Black.copy(alpha = 0.9f),
+                        colour = onTint(settings.tint.colour),
                     )
                 }
             }

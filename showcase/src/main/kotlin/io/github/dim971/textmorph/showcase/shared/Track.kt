@@ -69,13 +69,15 @@ private val TRACK = 4.dp
 private val TRACK_TOP = 62.dp
 
 /**
- * Where a tail tip sits: the top of the thumb rather than its centre.
+ * Where a tail tip sits.
  *
- * On the centre the thumb covers the tail entirely and the pill reads as a plain
- * pill with a notch bitten out of it. Three points of overlap is enough to look
- * attached without being swallowed.
+ * Upstream spells this out in its stylesheet: nine points of tail, then the
+ * thumb's nine points of radius, then two points of daylight. So the tip stops
+ * just short of the thumb rather than resting on it, and certainly rather than
+ * behind it: centred on the thumb, a disc covers the tail completely and the
+ * pill reads as a plain pill with a notch bitten out.
  */
-private val PILL_BOTTOM = TRACK_TOP + TRACK / 2 - THUMB / 2 + 3.dp
+private val PILL_BOTTOM = TRACK_TOP + TRACK / 2 - THUMB / 2 - 2.dp
 
 /** The state one frame of the physics writes, and the layout reads. All in points. */
 private class Motion(
@@ -135,11 +137,11 @@ fun RangeTrack(
     bubbles: List<@Composable () -> Unit>,
 ) {
     val count = fractions.size
+    val tint = bubbleColour ?: LocalShowcaseSettings.current.tint.colour
     val motion = remember(count) { Motion(count) }
     val bobs = remember(count) { List(count) { Bob() } }
     val density = LocalDensity.current
     val scale = density.density
-    val accent = bubbleColour ?: MaterialTheme.colorScheme.primary
 
     BoxWithConstraints(modifier.width(trackWidth).height(TRACK_TOP + THUMB)) {
         val span = maxWidth - THUMB
@@ -268,7 +270,9 @@ fun RangeTrack(
                 .width(span * (fractions.last() - from).coerceIn(0f, 1f))
                 .height(TRACK)
                 .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.primary),
+                // The filled part of the track takes the tint too, which is
+                // upstream: its fill is the same `--primary` as its bubble.
+                .background(tint),
         )
 
         for ((index, fraction) in fractions.withIndex()) {
@@ -328,7 +332,7 @@ fun RangeTrack(
                         }.onSizeChanged {
                             motion.width[index].floatValue = it.width / scale
                             motion.height[index].floatValue = it.height / scale - TAIL
-                        }.background(accent, BubbleShape())
+                        }.background(tint, BubbleShape())
                         .padding(
                             start = 10.dp,
                             end = 10.dp,

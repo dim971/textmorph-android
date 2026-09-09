@@ -14,6 +14,7 @@ import io.github.dim971.textmorph.showcase.shared.BubbleTrack
 import io.github.dim971.textmorph.showcase.shared.LocalInteractive
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.onTint
 import io.github.dim971.textmorph.showcase.shared.rememberAutoplay
 import io.github.dim971.textmorph.showcase.shared.stageFont
 import kotlin.math.roundToInt
@@ -57,7 +58,7 @@ fun RatingSliderDemo() {
                 text = word,
                 options = settings.options,
                 font = stageFont(size = 20.sp),
-                colour = Color.Black.copy(alpha = 0.9f),
+                colour = onTint(tone),
             )
         }
     }

@@ -30,6 +30,15 @@ class ShowcaseSettings {
     var debug by mutableStateOf(false)
     var disabled by mutableStateOf(false)
 
+    /**
+     * The colour the tinted cards are drawn in.
+     *
+     * Global rather than per card, so changing it in the playground changes the
+     * whole catalogue, which is the same argument the other switches make. The
+     * ink on it is not a second setting: it follows from the tint.
+     */
+    var tint by mutableStateOf(ShowcaseTint.Amber)
+
     /** The options as the library takes them. */
     val options: TextMorphOptions
         get() =

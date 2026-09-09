@@ -1,12 +1,18 @@
 package io.github.dim971.textmorph.showcase
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -17,12 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
 import io.github.dim971.textmorph.engine.TextMorphFont
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
+import io.github.dim971.textmorph.showcase.shared.ShowcaseTint
 import io.github.dim971.textmorph.showcase.shared.rememberCycle
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
 import kotlin.math.roundToInt
@@ -63,6 +71,8 @@ fun PlaygroundScreen() {
         Button(onClick = cycle::advance) { Text("Change the value") }
 
         HorizontalDivider()
+
+        Swatches(settings.tint) { settings.tint = it }
 
         Toggle("Spring instead of a bezier", settings.useSpring) { settings.useSpring = it }
         if (settings.useSpring) {
@@ -119,5 +129,55 @@ private fun Dial(
             onValueChange = { onChange(it.toDouble()) },
             valueRange = from.toFloat()..to.toFloat(),
         )
+    }
+}
+
+/**
+ * The tint the tinted cards are drawn in.
+ *
+ * Six of upstream's own colours, and the label under them names the ink rather
+ * than the colour: what a reader is really being shown is that the text on a
+ * pill follows from the pill, and is not a second choice they have to make.
+ */
+@Composable
+private fun Swatches(
+    current: ShowcaseTint,
+    onChange: (ShowcaseTint) -> Unit,
+) {
+    // The ink's name is bracketed on purpose: without the brackets the else
+    // branch swallows the tail of the sentence and only one reading comes out
+    // right.
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text =
+                "Tint: ${current.label}, with " +
+                    (if (current.ink == Color.Black) "black" else "white") +
+                    " on it",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            for (tint in ShowcaseTint.entries) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(34.dp)
+                            .background(tint.colour, RoundedCornerShape(8.dp))
+                            .border(
+                                width = if (tint == current) 2.dp else 0.dp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                shape = RoundedCornerShape(8.dp),
+                            ).clickable { onChange(tint) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // A letter in the ink the tint chose, so the rule is visible
+                    // on the swatch itself rather than only in the cards.
+                    Text(
+                        text = "A",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = tint.ink,
+                    )
+                }
+            }
+        }
     }
 }

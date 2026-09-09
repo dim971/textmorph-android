@@ -18,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
@@ -26,6 +25,7 @@ import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.Caption
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
 import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.onTint
 import io.github.dim971.textmorph.showcase.shared.rememberAutoplay
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
 import io.github.dim971.textmorph.showcase.shared.stageFont
@@ -66,7 +66,7 @@ fun SplitBarDemo() {
                 Modifier
                     .weight(share.coerceIn(0.08f, 0.92f))
                     .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(settings.tint.colour)
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -74,7 +74,7 @@ fun SplitBarDemo() {
                     text = "${'$'}${grouped(left)}",
                     options = settings.options,
                     font = stageFont(size = 20.sp),
-                    colour = Color.Black.copy(alpha = 0.85f),
+                    colour = onTint(settings.tint.colour),
                 )
             }
             Box(
