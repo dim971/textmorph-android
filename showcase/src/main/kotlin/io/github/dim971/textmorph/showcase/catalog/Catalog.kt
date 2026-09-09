@@ -1,43 +1,94 @@
 package io.github.dim971.textmorph.showcase.catalog
 
+import io.github.dim971.textmorph.showcase.demos.actionDemo
+import io.github.dim971.textmorph.showcase.demos.bubbleSliderDemo
+import io.github.dim971.textmorph.showcase.demos.chartDemo
+import io.github.dim971.textmorph.showcase.demos.copyDemo
 import io.github.dim971.textmorph.showcase.demos.currencySwapDemo
 import io.github.dim971.textmorph.showcase.demos.deltaDemo
+import io.github.dim971.textmorph.showcase.demos.dimensionsDemo
+import io.github.dim971.textmorph.showcase.demos.downloadDemo
+import io.github.dim971.textmorph.showcase.demos.earnedDemo
 import io.github.dim971.textmorph.showcase.demos.filtersDemo
 import io.github.dim971.textmorph.showcase.demos.helloDemo
 import io.github.dim971.textmorph.showcase.demos.hexColourDemo
-import io.github.dim971.textmorph.showcase.demos.numberFieldDemo
+import io.github.dim971.textmorph.showcase.demos.holdToConfirmDemo
+import io.github.dim971.textmorph.showcase.demos.installDemo
+import io.github.dim971.textmorph.showcase.demos.numberDemo
+import io.github.dim971.textmorph.showcase.demos.numoraFieldDemo
+import io.github.dim971.textmorph.showcase.demos.pullToCountDemo
+import io.github.dim971.textmorph.showcase.demos.rangeShoveDemo
+import io.github.dim971.textmorph.showcase.demos.ratingSliderDemo
 import io.github.dim971.textmorph.showcase.demos.reflowDemo
+import io.github.dim971.textmorph.showcase.demos.reorderListDemo
+import io.github.dim971.textmorph.showcase.demos.resizeDemo
+import io.github.dim971.textmorph.showcase.demos.resultsSummaryDemo
 import io.github.dim971.textmorph.showcase.demos.rewriteDemo
+import io.github.dim971.textmorph.showcase.demos.sloshGaugeDemo
 import io.github.dim971.textmorph.showcase.demos.spinDialDemo
+import io.github.dim971.textmorph.showcase.demos.splitBarDemo
 import io.github.dim971.textmorph.showcase.demos.squeezeToAbbreviateDemo
+import io.github.dim971.textmorph.showcase.demos.squishyNumberDemo
 import io.github.dim971.textmorph.showcase.demos.streamingDemo
 import io.github.dim971.textmorph.showcase.demos.tickerDemo
+import io.github.dim971.textmorph.showcase.demos.trailingTagDemo
 import io.github.dim971.textmorph.showcase.demos.unitsDemo
 import io.github.dim971.textmorph.showcase.demos.versionsDemo
 import io.github.dim971.textmorph.showcase.demos.walletDemo
 
 /**
- * The demos, in the order they are worth reading.
+ * The demos, in upstream's order.
  *
- * Hand-ordered, the way upstream orders its own examples: each group opens with
- * the plainest use of what it covers. Text first, then numbers, then the things
- * that need a morph to be interrupted or constrained.
+ * Card for card with torph's own examples page, and in its sequence, so the two
+ * can be read side by side. Upstream hand-orders them, opening each group with
+ * the plainest use of what it covers: text, then numbers, then the cards that
+ * need a morph to be interrupted, constrained or driven by a gesture.
+ *
+ * The values, the intervals and the eases are upstream's exactly. The interface
+ * around each morph is rewritten for this platform: upstream's spring-hung
+ * bubbles, its separating-axis collision and its elastic squish are not
+ * reproduced, because none of them is about TextMorph, and reimplementing them
+ * would put four thousand lines of physics in a catalogue whose job is to show
+ * one library. Where a card differs, its own file says so.
+ *
+ * The last two are ours. Upstream shows neither the first render, which never
+ * animates, nor a value emptying out, and both are worth a screen.
  */
 val catalog: List<Demo> =
     listOf(
-        helloDemo,
-        rewriteDemo,
+        installDemo,
+        bubbleSliderDemo,
+        rangeShoveDemo,
+        spinDialDemo,
+        numoraFieldDemo,
         streamingDemo,
-        filtersDemo,
+        copyDemo,
         hexColourDemo,
-        versionsDemo,
         walletDemo,
         deltaDemo,
+        earnedDemo,
+        filtersDemo,
+        versionsDemo,
+        holdToConfirmDemo,
         unitsDemo,
         currencySwapDemo,
-        squeezeToAbbreviateDemo,
+        actionDemo,
+        dimensionsDemo,
+        resultsSummaryDemo,
+        rewriteDemo,
         tickerDemo,
-        numberFieldDemo,
-        spinDialDemo,
+        chartDemo,
+        downloadDemo,
+        reorderListDemo,
+        pullToCountDemo,
+        ratingSliderDemo,
+        splitBarDemo,
+        resizeDemo,
+        squishyNumberDemo,
+        squeezeToAbbreviateDemo,
+        sloshGaugeDemo,
+        numberDemo,
+        trailingTagDemo,
+        helloDemo,
         reflowDemo,
     )
