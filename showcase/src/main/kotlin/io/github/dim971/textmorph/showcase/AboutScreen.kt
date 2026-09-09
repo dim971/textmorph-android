@@ -36,10 +36,10 @@ fun AboutScreen() {
         )
         Paragraph(
             "Thirty-three of the screens are upstream's own examples, in its order and with " +
-                "its values, so the two catalogues can be read side by side. The interface " +
-                "around each morph is written for this platform rather than reproduced: " +
-                "upstream's spring-hung bubbles and its collision solver are not here, and " +
-                "the catalogue says so.",
+                "its values, so the two catalogues can be read side by side. Where the motion " +
+                "is the demo, as on the two bubble sliders, upstream's own physics is here " +
+                "too. Elsewhere the interface around the morph is written for this platform " +
+                "rather than reproduced, and the catalogue says which is which.",
         )
         Text("How it is held to the original", style = MaterialTheme.typography.titleMedium)
         Paragraph(

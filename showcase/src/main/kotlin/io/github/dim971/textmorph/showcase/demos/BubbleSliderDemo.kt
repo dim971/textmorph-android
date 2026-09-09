@@ -64,7 +64,8 @@ val bubbleSliderDemo =
         id = "bubble",
         name = "Bubble slider",
         summary =
-            "The value rides the thumb, so it is morphing inside a box that is itself " +
+            "The value rides the thumb on a spring, so it trails the travel and leans " +
+                "into it, and it is morphing inside a box that is itself " +
                 "travelling. Those are two different motions and the library only owns one of them: " +
                 "the pill's journey is the layout's, and the digits rolling inside it are the morph's. " +
                 "Drag it slowly and the two come apart; drag it fast and the digits are still catching " +
