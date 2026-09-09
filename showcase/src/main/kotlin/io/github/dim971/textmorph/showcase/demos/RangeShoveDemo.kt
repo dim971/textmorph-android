@@ -32,9 +32,13 @@ fun RangeShoveDemo() {
     var taken by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val autoplay = rememberAutoplay(2200) { preset = (preset + 1) % PRESETS.size }
 
-    val (loTarget, hiTarget) = taken ?: PRESETS[preset]
-    val lo by animateFloatAsState(loTarget / 100f, label = "lo")
-    val hi by animateFloatAsState(hiTarget / 100f, label = "hi")
+    // The presets glide; a drag does not. Same reason as the single slider: an
+    // easing between the finger and the thumb is the thumb lagging the finger.
+    val (loPreset, hiPreset) = PRESETS[preset]
+    val loGlided by animateFloatAsState(loPreset / 100f, label = "lo")
+    val hiGlided by animateFloatAsState(hiPreset / 100f, label = "hi")
+    val lo = taken?.let { it.first / 100f } ?: loGlided
+    val hi = taken?.let { it.second / 100f } ?: hiGlided
 
     fun set(
         index: Int,

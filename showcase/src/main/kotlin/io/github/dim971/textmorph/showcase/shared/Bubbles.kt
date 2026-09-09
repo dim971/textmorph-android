@@ -97,6 +97,9 @@ internal const val SHOVE_SQUASH = 0.16f
 /** Points the tail hangs below the body. Its tip is the pivot. */
 internal const val TAIL = 9f
 
+/** Half the tail's base, so it reads as a tail rather than as a spike. */
+internal const val TAIL_HALF_BASE = 8f
+
 /** Points of corner rounding on the body. */
 internal const val BUBBLE_RADIUS = 14f
 

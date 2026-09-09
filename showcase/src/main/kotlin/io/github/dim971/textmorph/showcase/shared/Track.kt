@@ -19,7 +19,10 @@ package io.github.dim971.textmorph.showcase.shared
 // pill without recomposing the track.
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,11 +36,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
@@ -47,7 +53,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -63,6 +68,15 @@ private val TRACK = 4.dp
 
 /** Where the track sits under the bubbles. */
 private val TRACK_TOP = 62.dp
+
+/**
+ * Where a tail tip sits: the top of the thumb rather than its centre.
+ *
+ * On the centre the thumb covers the tail entirely and the pill reads as a plain
+ * pill with a notch bitten out of it. Three points of overlap is enough to look
+ * attached without being swallowed.
+ */
+private val PILL_BOTTOM = TRACK_TOP + TRACK / 2 - THUMB / 2 + 3.dp
 
 /** The state one frame of the physics writes, and the layout reads. All in points. */
 private class Motion(
@@ -135,6 +149,26 @@ fun RangeTrack(
 
         fun thumbAt(fraction: Float) = thumbHalf + spanDp * fraction.coerceIn(0f, 1f)
 
+        // Every read inside the drag goes through state, so the lambda cannot go
+        // stale however many times the track recomposes under the finger. That
+        // staleness was the bug this replaces: a gesture lambda keeps whatever it
+        // captured when the pointer input was set up, so every event moved the
+        // thumb from a value several events old and the drag stalled after one
+        // step.
+        val liveSet = rememberUpdatedState(onFraction)
+        val liveSpan = rememberUpdatedState(spanDp)
+        val liveFractions = rememberUpdatedState(fractions)
+        val at = remember { mutableFloatStateOf(0f) }
+        val active = remember { mutableIntStateOf(0) }
+        val drag =
+            rememberDraggableState { delta ->
+                at.floatValue += delta
+                liveSet.value?.invoke(
+                    active.intValue,
+                    fractionOf(at.floatValue, scale, thumbHalf, liveSpan.value),
+                )
+            }
+
         // Keyed on the targets rather than on the list, which is a new object
         // every recomposition. The loop runs until the springs settle and then
         // stops, so a track at rest costs nothing.
@@ -196,6 +230,28 @@ fun RangeTrack(
             }
         }
 
+        // One draggable over the whole width, because upstream's slider is a
+        // native range input spanning the track: a reader can grab it anywhere,
+        // not only on the thumb, and that is most of why the site feels
+        // continuous. It declares its orientation, so a horizontal drag here and
+        // a vertical scroll in the page around it never fight.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(TRACK_TOP + THUMB)
+                .draggable(
+                    state = drag,
+                    orientation = Orientation.Horizontal,
+                    enabled = onFraction != null,
+                    onDragStarted = { start ->
+                        val touched = fractionOf(start.x, scale, thumbHalf, liveSpan.value)
+                        active.intValue = nearest(liveFractions.value, touched)
+                        at.floatValue = start.x
+                        liveSet.value?.invoke(active.intValue, touched)
+                    },
+                ),
+        )
+
         Box(
             Modifier
                 .fillMaxWidth()
@@ -223,19 +279,16 @@ fun RangeTrack(
                 Modifier
                     .offset(x = centre - THUMB / 2, y = TRACK_TOP - THUMB / 2 + TRACK / 2)
                     .size(THUMB)
+                    .shadow(2.dp, RoundedCornerShape(50))
                     .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.onSurface)
-                    .then(
-                        if (onFraction == null) {
-                            Modifier
-                        } else {
-                            Modifier.pointerInput(index, spanDp) {
-                                detectDragGestures { _, delta ->
-                                    val step = delta.x / scale / spanDp
-                                    onFraction(index, (fraction + step).coerceIn(0f, 1f))
-                                }
-                            }
-                        },
+                    // Pale rather than ink, which is upstream's: a dark disc
+                    // under a coloured pill reads as a hole, and it swallows
+                    // the tail.
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                        RoundedCornerShape(50),
                     ),
             )
 
@@ -248,7 +301,7 @@ fun RangeTrack(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(TRACK_TOP + TRACK / 2)
+                        .height(PILL_BOTTOM)
                         .offset {
                             IntOffset(
                                 x =
@@ -333,13 +386,52 @@ private class BubbleShape : Shape {
                         cornerRadius = CornerRadius(radius),
                     ),
                 )
-                // Slightly off-centre and asymmetric, which is what makes it read as
-                // a tail rather than as an arrow.
-                moveTo(size.width / 2 - tail * 0.85f, body - 1f)
-                lineTo(size.width / 2 + tail * 0.15f, size.height)
-                lineTo(size.width / 2 + tail * 0.55f, body - 1f)
+                // Symmetric, and its apex is exactly the bottom centre of the
+                // box, which is what the layer rotates about. An off-centre apex
+                // means the pill pivots about a point that is not its tip, so
+                // the tail slides off the thumb as it leans.
+                val half = with(density) { TAIL_HALF_BASE.dp.toPx() }
+                moveTo(size.width / 2 - half, body - 1f)
+                lineTo(size.width / 2, size.height)
+                lineTo(size.width / 2 + half, body - 1f)
                 close()
             }
         return Outline.Generic(path)
     }
+}
+
+/** Where a touch falls along the track, as a fraction. */
+private fun fractionOf(
+    x: Float,
+    scale: Float,
+    thumbHalf: Float,
+    spanDp: Float,
+): Float {
+    if (spanDp <= 0f) return 0f
+    // Bounded here rather than by the caller, because a fraction is the track's
+    // own contract: a demo that has to remember to clamp is a demo that will one
+    // day show 105%.
+    return (((x / scale) - thumbHalf) / spanDp).coerceIn(0f, 1f)
+}
+
+/**
+ * Which thumb a touch belongs to.
+ *
+ * The nearer one, which is what a reader means by grabbing near it, and the only
+ * sensible answer once a range's two thumbs are close enough to be leaning apart.
+ */
+private fun nearest(
+    fractions: List<Float>,
+    at: Float,
+): Int {
+    var best = 0
+    var distance = Float.MAX_VALUE
+    for ((index, fraction) in fractions.withIndex()) {
+        val d = abs(fraction - at)
+        if (d < distance) {
+            distance = d
+            best = index
+        }
+    }
+    return best
 }

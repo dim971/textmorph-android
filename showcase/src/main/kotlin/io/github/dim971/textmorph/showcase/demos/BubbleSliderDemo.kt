@@ -30,10 +30,12 @@ fun BubbleSliderDemo() {
     var taken by remember { mutableFloatStateOf(Float.NaN) }
     val autoplay = rememberAutoplay(1700) { preset = (preset + 1) % BRIGHTNESS.size }
 
-    // The value glides to the next preset rather than cutting to it, so the
-    // pill is carried by the travel and the digits roll on the way.
-    val target = if (taken.isNaN()) BRIGHTNESS[preset] / 100f else taken
-    val fraction by animateFloatAsState(target, tween(700), label = "value")
+    // Autoplay glides to the next preset rather than cutting to it, so the pill
+    // is carried by the travel and the digits roll on the way. A drag is
+    // immediate: a tween between the finger and the thumb reads as the thumb
+    // refusing to keep up, which is exactly what it is.
+    val glided by animateFloatAsState(BRIGHTNESS[preset] / 100f, tween(700), label = "preset")
+    val fraction = if (taken.isNaN()) glided else taken
     val value = (fraction * 100).roundToInt()
 
     Stage(caption = if (autoplay.isPlaying) "drag the thumb" else "brightness") {
