@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.dim971.textmorph.showcase.shared.LocalAutoAdvance
+import io.github.dim971.textmorph.showcase.shared.LocalInteractive
 
 /**
  * The catalogue, with a live preview in every row.
@@ -46,7 +47,10 @@ fun CatalogScreen(onOpen: (Demo) -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CompositionLocalProvider(LocalAutoAdvance provides true) {
+                    CompositionLocalProvider(
+                        LocalAutoAdvance provides true,
+                        LocalInteractive provides false,
+                    ) {
                         demo.content()
                     }
                     Column(Modifier.fillMaxWidth()) {
