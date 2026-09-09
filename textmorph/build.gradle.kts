@@ -71,6 +71,9 @@ mavenPublishing {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_17
+        // The library ships. A warning here is a warning in every consumer's
+        // build log, and one that is tolerated becomes one that is ignored.
+        allWarningsAsErrors = true
     }
 }
 
