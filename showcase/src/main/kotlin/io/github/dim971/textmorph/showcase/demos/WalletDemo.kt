@@ -1,52 +1,76 @@
 package io.github.dim971.textmorph.showcase.demos
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
-import io.github.dim971.textmorph.engine.TextMorphFont
 import io.github.dim971.textmorph.showcase.catalog.Demo
+import io.github.dim971.textmorph.showcase.shared.Chip
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
-import io.github.dim971.textmorph.showcase.shared.Tappable
+import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.rememberTicker
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
-import kotlin.math.roundToInt
-import kotlin.random.Random
+import io.github.dim971.textmorph.showcase.shared.stageFont
 
-/** A balance, which is what place-value morphing is for. */
+private val WALLET =
+    listOf(
+        "Connect wallet",
+        "Connecting\u2026",
+        "0xd55a\u2026d2685",
+        "lochie.eth",
+    )
+
+/** A connect button that becomes an address and then a name. */
 @Composable
 fun WalletDemo() {
     val settings = LocalShowcaseSettings.current
-    var balance by remember { mutableDoubleStateOf(1204.0) }
+    val index = rememberTicker(WALLET.size, 1800)
 
-    Tappable(
-        hint = "Tap to spend a little",
-        advance = {
-            val spent = (balance - Random.nextInt(80, 400)).roundToInt().toDouble()
-            balance = if (spent < 100) 1204.0 else spent
-        },
-    ) {
-        Row {
-            Text(
-                text = "$",
-                modifier = Modifier.alignByBaseline(),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextMorph(
-                value = balance,
-                modifier = Modifier.alignByBaseline(),
-                options = settings.options(decimals = 2),
-                font = TextMorphFont(fontSize = 40.sp, fontWeight = FontWeight.SemiBold),
-                colour = showcaseColour(),
-            )
+    Stage {
+        Chip {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
+                // An avatar appears once there is an account to put one on,
+                // which is what makes the pill grow from the left as well as
+                // the right. Upstream loads a photograph; a disc is enough to
+                // show the pill absorbing it.
+                AnimatedVisibility(
+                    visible = index >= 2,
+                    enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.5f),
+                    exit = fadeOut(tween(200)) + scaleOut(tween(200), targetScale = 0.5f),
+                ) {
+                    Box(
+                        Modifier
+                            .size(20.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                    )
+                }
+                TextMorph(
+                    text = WALLET[index],
+                    modifier = Modifier.padding(start = if (index >= 2) 8.dp else 0.dp),
+                    options = settings.options,
+                    font = stageFont(size = 18.sp),
+                    colour = showcaseColour(),
+                )
+            }
         }
     }
 }
@@ -56,17 +80,13 @@ val walletDemo =
         id = "wallet",
         name = "Wallet",
         summary =
-            "The one that makes the case for the whole library. 1,204 becoming 1,318 rolls " +
-                "the hundreds and the tens and leaves the thousands alone, because a digit's identity " +
-                "is its column rather than its position in the string.",
-        capability = "place-value alignment",
+            "Connect wallet, then an ellipsis while it connects, then a truncated address, " +
+                "then a name. Four states with almost nothing in common, so most of it is a group " +
+                "replacement, and the pill's width carries the whole way.",
+        capability = "a chain of unrelated values, and the pill that holds them",
         code =
             """
-            TextMorph(
-                value = balance,
-                options = TextMorphOptions(decimals = 2),
-                font = TextMorphFont(fontSize = 40.sp, fontWeight = FontWeight.SemiBold),
-            )
+            Chip { TextMorph(text = state) }
             """.trimIndent(),
         content = { WalletDemo() },
     )

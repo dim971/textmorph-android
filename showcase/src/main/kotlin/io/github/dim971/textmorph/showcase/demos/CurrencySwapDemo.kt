@@ -1,66 +1,30 @@
 package io.github.dim971.textmorph.showcase.demos
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
-import io.github.dim971.textmorph.engine.TextMorphFont
 import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
-import io.github.dim971.textmorph.showcase.shared.Tappable
-import io.github.dim971.textmorph.showcase.shared.rememberCycle
+import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.rememberTicker
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
-import java.util.Locale
+import io.github.dim971.textmorph.showcase.shared.stageFont
 
-/** The same amount in another locale. */
+private val CURRENCIES = listOf("${'$'}99.00", "\u20AC99.00", "\u00A399.00", "\u00A599.00")
+
+/** The same amount behind four different symbols. */
 @Composable
 fun CurrencySwapDemo() {
     val settings = LocalShowcaseSettings.current
-    val cycle =
-        rememberCycle(
-            "en-US" to "$",
-            "de-DE" to "€",
-            "fr-FR" to "€",
-            "en-GB" to "£",
-        )
-    val (tag, symbol) = cycle.current
+    val index = rememberTicker(CURRENCIES.size, 1400)
 
-    Tappable(hint = "Tap to change the locale", advance = cycle::advance) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Row {
-                Text(
-                    text = symbol,
-                    modifier = Modifier.alignByBaseline(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextMorph(
-                    value = 1234.5,
-                    modifier = Modifier.alignByBaseline(),
-                    options = settings.options(decimals = 2, locale = Locale.forLanguageTag(tag)),
-                    font = TextMorphFont(fontSize = 36.sp, fontWeight = FontWeight.SemiBold),
-                    colour = showcaseColour(),
-                )
-            }
-            Text(
-                text = tag,
-                style = MaterialTheme.typography.labelMedium,
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+    Stage {
+        TextMorph(
+            text = CURRENCIES[index],
+            options = settings.options,
+            font = stageFont(size = 40.sp),
+            colour = showcaseColour(),
+        )
     }
 }
 
@@ -69,19 +33,15 @@ val currencySwapDemo =
         id = "currency",
         name = "Currency swap",
         summary =
-            "One number, four locales. The decimal separator is the pivot every column is " +
-                "measured from, so changing it moves every digit; the grouping separator changes shape " +
-                "with it, and some locales group with a space rather than a comma.",
-        capability = "the locale's decimal separator as the pivot",
+            "Only the symbol changes, and the digits do not move at all. A currency symbol " +
+                "is an affix: it is trimmed before the columns are aligned, so it is free to be " +
+                "replaced without disturbing the number it sits in front of. The four symbols are " +
+                "different widths, so the box breathes while the digits hold.",
+        capability = "affix trimming, seen from the affix's side",
         code =
             """
-            TextMorph(
-                value = amount,
-                options = TextMorphOptions(
-                    decimals = 2,
-                    locale = Locale.forLanguageTag("de-DE"),
-                ),
-            )
+            TextMorph(text = "${'$'}99.00")
+            TextMorph(text = "\u20AC99.00")
             """.trimIndent(),
         content = { CurrencySwapDemo() },
     )

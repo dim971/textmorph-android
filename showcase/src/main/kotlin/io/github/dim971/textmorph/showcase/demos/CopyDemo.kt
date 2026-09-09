@@ -1,7 +1,6 @@
 package io.github.dim971.textmorph.showcase.demos
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
 import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.Chip
@@ -11,38 +10,35 @@ import io.github.dim971.textmorph.showcase.shared.rememberTicker
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
 import io.github.dim971.textmorph.showcase.shared.stageFont
 
-private val FILTERS = listOf("All Markets", "Markets (1)", "Markets (2)", "Markets (3)")
-
-/** A filter pill that gains a count. */
+/** Two words, one letter apart. */
 @Composable
-fun FiltersDemo() {
+fun CopyDemo() {
     val settings = LocalShowcaseSettings.current
-    val index = rememberTicker(FILTERS.size, 1500)
+    val index = rememberTicker(2, 2000)
 
     Stage {
         Chip {
             TextMorph(
-                text = FILTERS[index],
+                text = if (index == 0) "Copy" else "Copied",
                 options = settings.options,
-                font = stageFont(size = 20.sp),
+                font = stageFont(),
                 colour = showcaseColour(),
             )
         }
     }
 }
 
-val filtersDemo =
+val copyDemo =
     Demo(
-        id = "filters",
-        name = "Filters",
+        id = "copy",
+        name = "Copy",
         summary =
-            "All Markets becoming Markets (1). The word Markets survives and slides left as " +
-                "All leaves, and the digit inside the brackets rolls on its own because a bracketed " +
-                "number is still a quantity.",
-        capability = "a word leaving beside a quantity that rolls",
+            "Copy becoming Copied. Four letters survive, two arrive, and the pill grows to " +
+                "fit rather than jumping, because the container animates its own width.",
+        capability = "the container's width as an animated axis",
         code =
             """
-            Chip { TextMorph(text = "Markets (${'$'}count)") }
+            Chip { TextMorph(text = if (copied) "Copied" else "Copy") }
             """.trimIndent(),
-        content = { FiltersDemo() },
+        content = { CopyDemo() },
     )

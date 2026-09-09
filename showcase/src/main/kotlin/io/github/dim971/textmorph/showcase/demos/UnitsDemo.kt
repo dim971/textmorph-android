@@ -1,28 +1,44 @@
 package io.github.dim971.textmorph.showcase.demos
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
-import io.github.dim971.textmorph.engine.TextMorphFont
 import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
-import io.github.dim971.textmorph.showcase.shared.Tappable
-import io.github.dim971.textmorph.showcase.shared.rememberCycle
+import io.github.dim971.textmorph.showcase.shared.SplitRow
+import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.rememberTicker
 import io.github.dim971.textmorph.showcase.shared.showcaseColour
+import io.github.dim971.textmorph.showcase.shared.stageFont
 
-/** A quantity and its unit, which change together. */
+private val GLUED = listOf("819K", "990K", "9.9M", "19.4M")
+private val SPACED = listOf("910 KB", "1.2 MB", "12 MB", "1.25 GB")
+
+/** A quantity glued to its unit, beside one separated from it. */
 @Composable
 fun UnitsDemo() {
     val settings = LocalShowcaseSettings.current
-    val cycle = rememberCycle("1.2 GB", "980 MB", "412 MB", "8.4 GB", "64 KB")
+    val index = rememberTicker(GLUED.size, 1600)
 
-    Tappable(hint = "Tap for the next size", advance = cycle::advance) {
-        TextMorph(
-            text = cycle.current,
-            options = settings.options,
-            font = TextMorphFont(fontSize = 34.sp, fontWeight = FontWeight.Medium),
-            colour = showcaseColour(),
+    Stage {
+        SplitRow(
+            separator = "-",
+            left = {
+                TextMorph(
+                    text = GLUED[index],
+                    options = settings.options,
+                    font = stageFont(size = 30.sp),
+                    colour = showcaseColour(),
+                )
+            },
+            right = {
+                TextMorph(
+                    text = SPACED[index],
+                    options = settings.options,
+                    font = stageFont(size = 30.sp),
+                    colour = showcaseColour(),
+                )
+            },
         )
     }
 }
@@ -32,13 +48,15 @@ val unitsDemo =
         id = "units",
         name = "Units",
         summary =
-            "Two words, one of them a quantity and one of them not. The quantity morphs by " +
-                "place value and the unit morphs by character, in the same value, because the numeric " +
-                "pass runs over the finished segmentation rather than inside it.",
-        capability = "a numeric word beside a plain one",
+            "819K on the left, 910 KB on the right, and the space between the number and " +
+                "the unit is the whole difference. Glued, the token is one word and the letter travels " +
+                "with the digits; separated, it is two words and the unit morphs on its own while the " +
+                "quantity rolls by place value.",
+        capability = "a space deciding whether a unit belongs to the number",
         code =
             """
-            TextMorph(text = "${'$'}amount ${'$'}unit")
+            TextMorph(text = "9.9M")     // one word
+            TextMorph(text = "12 MB")    // two, and only the first rolls
             """.trimIndent(),
         content = { UnitsDemo() },
     )
