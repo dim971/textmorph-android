@@ -2,30 +2,41 @@ package io.github.dim971.textmorph.showcase.demos
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import io.github.dim971.textmorph.compose.TextMorph
-import io.github.dim971.textmorph.engine.TextMorphFont
 import io.github.dim971.textmorph.showcase.catalog.Demo
 import io.github.dim971.textmorph.showcase.shared.LocalShowcaseSettings
-import io.github.dim971.textmorph.showcase.shared.Tappable
-import io.github.dim971.textmorph.showcase.shared.rememberCycle
-import kotlin.math.abs
+import io.github.dim971.textmorph.showcase.shared.ShowcaseSettings
+import io.github.dim971.textmorph.showcase.shared.Stage
+import io.github.dim971.textmorph.showcase.shared.rememberTicker
+import io.github.dim971.textmorph.showcase.shared.showcaseColour
+import io.github.dim971.textmorph.showcase.shared.stageFont
+
+// U+2212, not a hyphen: it is the width of the plus it replaces, so the digits
+// beside it do not shift when the sign changes. Upstream's own note.
+private val DELTAS = listOf("+2.4%", "\u22120.8%", "+11.2%", "0.0%", "\u221213.6%")
+
+private fun tone(value: String): Color =
+    when {
+        value.startsWith("\u2212") -> Color(0xFFFF6B6B)
+        value.startsWith("+") -> Color(0xFF4ADE80)
+        else -> Color.Unspecified
+    }
 
 /** A signed change, where the sign is part of the morph. */
 @Composable
 fun DeltaDemo() {
     val settings = LocalShowcaseSettings.current
-    val cycle = rememberCycle(2.4, -1.8, 5.1, -0.3, 12.7)
-    val reading = cycle.current
-    val sign = if (reading < 0) "-" else "+"
+    val index = rememberTicker(DELTAS.size, 1600)
+    val value = DELTAS[index]
+    val colour = tone(value)
 
-    Tappable(hint = "Tap for the next reading", advance = cycle::advance) {
+    Stage {
         TextMorph(
-            text = "$sign${abs(reading)}%",
-            options = settings.options,
-            font = TextMorphFont(fontSize = 34.sp, fontWeight = FontWeight.Medium),
-            colour = if (reading < 0) Color(0xFFD1453B) else Color(0xFF1E8E3E),
+            text = value,
+            options = settings.optionsWith(ShowcaseSettings.UpstreamSpring),
+            font = stageFont(size = 34.sp),
+            colour = if (colour == Color.Unspecified) showcaseColour() else colour,
         )
     }
 }
@@ -35,14 +46,15 @@ val deltaDemo =
         id = "delta",
         name = "Delta",
         summary =
-            "A sign and a percent sign around the digits. Both are affixes: they pair off " +
-                "before the columns are aligned, so the digits still roll by place while the sign " +
-                "changes on its own.",
-        capability = "affix trimming, and symbols sliding from below",
+            "A sign in front and a percent sign behind, both affixes, so they pair off before " +
+                "the columns are aligned and the digits still roll by place. The sign is U+2212 rather " +
+                "than a hyphen, which is upstream's choice and a good one: it is the width of the plus " +
+                "it replaces, so nothing shifts when the reading turns negative.",
+        capability = "affixes at both ends, and symbols sliding from below",
         code =
             """
             TextMorph(
-                text = "${'$'}sign${'$'}{abs(change)}%",
+                text = "\u22120.8%",
                 colour = if (change < 0) Color.Red else Color.Green,
             )
             """.trimIndent(),
