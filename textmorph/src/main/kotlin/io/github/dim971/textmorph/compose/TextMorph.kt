@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
@@ -75,10 +76,20 @@ public fun TextMorph(
     options: TextMorphOptions = TextMorphOptions.Default,
     font: TextMorphFont = TextMorphFont.Default,
     colour: Color = Color.Black,
+    textAlign: TextAlign? = null,
     cursorIndex: Int? = null,
     callbacks: MorphCallbacks = MorphCallbacks(),
 ) {
-    TextMorph(MorphValue.Text(text), modifier, options, font, colour, cursorIndex, callbacks)
+    TextMorph(
+        MorphValue.Text(text),
+        modifier,
+        options,
+        font,
+        colour,
+        textAlign,
+        cursorIndex,
+        callbacks,
+    )
 }
 
 /** Shows a number, formatted by the options. */
@@ -89,10 +100,20 @@ public fun TextMorph(
     options: TextMorphOptions = TextMorphOptions.Default,
     font: TextMorphFont = TextMorphFont.Default,
     colour: Color = Color.Black,
+    textAlign: TextAlign? = null,
     cursorIndex: Int? = null,
     callbacks: MorphCallbacks = MorphCallbacks(),
 ) {
-    TextMorph(MorphValue.Number(value), modifier, options, font, colour, cursorIndex, callbacks)
+    TextMorph(
+        MorphValue.Number(value),
+        modifier,
+        options,
+        font,
+        colour,
+        textAlign,
+        cursorIndex,
+        callbacks,
+    )
 }
 
 /** Shows a value. */
@@ -103,6 +124,15 @@ public fun TextMorph(
     options: TextMorphOptions = TextMorphOptions.Default,
     font: TextMorphFont = TextMorphFont.Default,
     colour: Color = Color.Black,
+    /**
+     * Which edge the lines of a multi-line value line up on.
+     *
+     * Null follows the layout direction, which is what a value with one line
+     * wants and what upstream does. It matters only for a value that holds a
+     * line break, because there is no automatic wrapping: a line exists only
+     * where the value put one.
+     */
+    textAlign: TextAlign? = null,
     cursorIndex: Int? = null,
     callbacks: MorphCallbacks = MorphCallbacks(),
 ) {
@@ -118,12 +148,7 @@ public fun TextMorph(
     val typeface = remember(font, resolver) { font.typeface(resolver) }
     val textSize = remember(font, density) { font.pixelSize(density) }
     val letterSpacing = remember(font) { font.letterSpacingEm() }
-    val alignment =
-        if (direction == LayoutDirection.Rtl) {
-            MorphAlignment.TRAILING
-        } else {
-            MorphAlignment.LEADING
-        }
+    val alignment = morphAlignment(textAlign, direction)
 
     host.configure(
         typeface = typeface,
@@ -323,4 +348,25 @@ internal fun TextMorphFont.letterSpacingEm(): Float =
 internal fun TextMorphFont.typeface(resolver: FontFamily.Resolver): Typeface {
     val resolved = resolver.resolve(fontFamily, fontWeight, fontStyle, fontSynthesis).value
     return resolved as? Typeface ?: Typeface.DEFAULT
+}
+
+/**
+ * Compose's own alignment vocabulary, resolved against the layout direction.
+ *
+ * `Justify` has no meaning here: justifying needs a measured line width to
+ * stretch to, and this library never wraps, so every line is already its natural
+ * width. It reads as start, which is what a text node does with a single line.
+ */
+internal fun morphAlignment(
+    align: TextAlign?,
+    direction: LayoutDirection,
+): MorphAlignment {
+    val rtl = direction == LayoutDirection.Rtl
+    return when (align) {
+        TextAlign.Center -> MorphAlignment.CENTRE
+        TextAlign.Left -> MorphAlignment.LEADING
+        TextAlign.Right -> MorphAlignment.TRAILING
+        TextAlign.End -> if (rtl) MorphAlignment.LEADING else MorphAlignment.TRAILING
+        else -> if (rtl) MorphAlignment.TRAILING else MorphAlignment.LEADING
+    }
 }
